@@ -176,12 +176,11 @@ $dbatoolsSystemSystemNode.MultiFileImport -or
 $dbatoolsSystemUserNode.MultiFileImport -or
 $option.MultiFileImport
 
+if ($PSModuleRoot -like '*src*') {
+    $gitDir = [IO.Path]::Combine($PSModuleRoot.Trim('src'), '.git')
+}
 
-$gitDir = $script:PSModuleRoot, '.git' -join [IO.Path]::DirectorySeparatorChar
-if ($dbatools_enabledebug -or
-    $option.Debug -or
-    $DebugPreference -ne 'silentlycontinue' -or
-    [IO.Directory]::Exists($gitDir)) {
+if ($dbatools_enabledebug -or $option.Debug -or $DebugPreference -ne 'SilentlyContinue' -or [IO.Directory]::Exists($gitDir)) {
     $script:multiFileImport, $script:SerialImport, $script:doDotSource = $true, $true, $true
 }
 #endregion Multi File Import
@@ -206,7 +205,7 @@ Theoretically, there's a minor cuncurrency collision risk with that, but since t
 a little import time loss if that happens ...
 #>
 if ((-not ('Sqlcollaborative.Dbatools.dbaSystem.DebugHost' -as [type])) -or (-not [Sqlcollaborative.Dbatools.dbaSystem.SystemHost]::ModuleBase)) {
-    . $script:psScriptRoot\internal\scripts\libraryimport.ps1
+    . $script:PSModuleRoot\internal\scripts\libraryimport.ps1
     Write-ImportTime -Text "Starting import SMO libraries"
 }
 
@@ -221,23 +220,19 @@ if ((-not ('Sqlcollaborative.Dbatools.dbaSystem.DebugHost' -as [type])) -or (-no
 
 # Load our own custom library
 # Should always come before function imports
-. $psScriptRoot\bin\library.ps1
-. $psScriptRoot\bin\typealiases.ps1
+. $PSModuleRoot\bin\library.ps1
+. $PSModuleRoot\bin\typealiases.ps1
 Write-ImportTime -Text "Loading dbatools library"
 
 # Tell the library where the module is based, just in case
-[Sqlcollaborative.Dbatools.dbaSystem.SystemHost]::ModuleBase = $script:PSModuleRoot
+[Sqlcollaborative.Dbatools.dbaSystem.SystemHost]::ModuleBase = $PSModuleRoot
 
 if ($script:multiFileImport) {
     # All internal functions privately available within the toolset
-    foreach ($file in (Get-ChildItem -Path "$psScriptRoot\internal\functions\" -Recurse -Filter *.ps1)) {
+    foreach ($file in (Get-ChildItem -Path "$PSModuleRoot\internal\functions\" -Recurse -Filter *.ps1)) {
         . $file.FullName
     }
     Write-ImportTime -Text "Loading Internal Commands"
-
-    #    . $psScriptRoot\internal\scripts\cmdlets.ps1
-
-    Write-ImportTime -Text "Registering cmdlets"
 
     # All exported functions
     foreach ($file in (Get-ChildItem -Path "$script:PSModuleRoot\functions\" -Recurse -Filter *.ps1)) {
@@ -246,10 +241,8 @@ if ($script:multiFileImport) {
     Write-ImportTime -Text "Loading Public Commands"
 
 } else {
-    #    . $psScriptRoot\internal\scripts\cmdlets.ps1
 
-    . $psScriptRoot\allcommands.ps1
-    #. (Resolve-Path -Path "$script:PSModuleRoot\allcommands.ps1")
+    . $PSModuleRoot\allcommands.ps1
     Write-ImportTime -Text "Loading Public and Private Commands"
 
     Write-ImportTime -Text "Registering cmdlets"
@@ -257,7 +250,7 @@ if ($script:multiFileImport) {
 
 # Load configuration system
 # Should always go after library and path setting
-. $psScriptRoot\internal\configurations\configuration.ps1
+. $PSModuleRoot\internal\configurations\configuration.ps1
 Write-ImportTime -Text "Configuration System"
 
 # Resolving the path was causing trouble when it didn't exist yet
@@ -270,33 +263,33 @@ if (-not ([Sqlcollaborative.Dbatools.Message.LogHost]::LoggingPath)) {
 # Note: Each optional file must include a conditional governing whether it's run at all.
 # Validations were moved into the other files, in order to prevent having to update dbatools.psm1 every time
 # 96ms
-foreach ($file in (Get-ChildItem -Path "$script:PSScriptRoot\optional" -Filter *.ps1)) {
+foreach ($file in (Get-ChildItem -Path "$PSModuleRoot\optional" -Filter *.ps1)) {
     . $file.FullName
 }
 Write-ImportTime -Text "Loading Optional Commands"
 
 # Process TEPP parameters
-. $psScriptRoot\internal\scripts\insertTepp.ps1
+. $PSModuleRoot\internal\scripts\insertTepp.ps1
 Write-ImportTime -Text "Loading TEPP"
 
 
 # Process transforms
-. $psScriptRoot\internal\scripts\message-transforms.ps1
+. $PSModuleRoot\internal\scripts\message-transforms.ps1
 Write-ImportTime -Text "Loading Message Transforms"
 
 # Load scripts that must be individually run at the end #
 #-------------------------------------------------------#
 
 # Start the logging system (requires the configuration system up and running)
-. $psScriptRoot\internal\scripts\logfilescript.ps1
+. $PSModuleRoot\internal\scripts\logfilescript.ps1
 Write-ImportTime -Text "Script: Logging"
 
 # Start the tepp asynchronous update system (requires the configuration system up and running)
-. $psScriptRoot\internal\scripts\updateTeppAsync.ps1
+. $PSModuleRoot\internal\scripts\updateTeppAsync.ps1
 Write-ImportTime -Text "Script: Asynchronous TEPP Cache"
 
 # Start the maintenance system (requires pretty much everything else already up and running)
-. $psScriptRoot\internal\scripts\dbatools-maintenance.ps1
+. $PSModuleRoot\internal\scripts\dbatools-maintenance.ps1
 Write-ImportTime -Text "Script: Maintenance"
 
 #region Aliases
