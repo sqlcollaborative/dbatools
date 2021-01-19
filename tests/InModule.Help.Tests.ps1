@@ -114,9 +114,8 @@ foreach ($command in $commands) {
         Context "Test parameter help for $commandName" {
 
             $Common = [System.Management.Automation.PSCmdlet]::CommonParameters
-            $Optional = [System.Management.Automation.PSCmdlet]::OptionalCommonParameters
 
-            $parameters = $command.ParameterSets.Parameters | Sort-Object -Property Name -Unique | Where-Object { $_.Name -notin $common -and $_.Name -notin $Optional }
+            $parameters = $command.ParameterSets.Parameters | Sort-Object -Property Name -Unique | Where-Object { $_.Name -notin $common }
             $parameterNames = $parameters.Name
             $HelpParameterNames = $Help.Parameters.Parameter.Name | Sort-Object -Unique
             foreach ($parameter in $parameters) {
