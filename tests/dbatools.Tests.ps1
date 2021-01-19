@@ -1,4 +1,4 @@
-Write-Host -Object "Running $PSCommandpath" -ForegroundColor Cyan
+Write-Host -Object "Running $PSCommandPath" -ForegroundColor Cyan
 $ModulePath = [IO.Path]::Combine(([string]$PSScriptRoot).Trim("tests"), 'src')
 $ModuleName = (Split-Path -Leaf $MyInvocation.MyCommand.Path) -Replace ".Tests.ps1"
 
@@ -138,12 +138,14 @@ Describe "$ModuleName Tests missing" -Tag 'Tests' {
     $functions = Get-ChildItem "$ModulePath\functions\" -Recurse -Include *.ps1
     Context "Every function should have tests" {
         foreach ($f in $functions) {
-            It "$($f.basename) has a tests.ps1 file" {
-                Test-Path "tests\$($f.basename).tests.ps1" | Should Be $true
+            $fileBase = $f.BaseName
+            $testPath = "$PSScriptRoot\$fileBase.Tests.ps1"
+            It "$fileBase has a tests.ps1 file" {
+                Test-Path $testPath | Should Be $true
             }
-            If (Test-Path "tests\$($f.basename).tests.ps1") {
-                It "$($f.basename) has validate parameters unit test" {
-                    "tests\$($f.basename).tests.ps1" | should FileContentMatch 'Context "Validate parameters"'
+            If (Test-Path $testPath) {
+                It "$fileBase has validate parameters unit test" {
+                    $testPath | Should -FileContentMatch 'Context "Validate parameters"'
                 }
             }
         }
