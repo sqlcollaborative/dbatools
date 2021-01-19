@@ -63,7 +63,7 @@ if ($IsLinux -or $IsMacOs) {
     $fileUserLocal = $Env:XDG_CONFIG_HOME
     if (-not $fileUserLocal) { $fileUserLocal = Join-Path $HOME .config/ }
 
-    $script:path_FileUserLocal = Join-DbaPath $fileUserLocal $psVersionName "dbatools/"
+    $script:path_FileUserLocal = Join-Path $fileUserLocal "$psVersionName/dbatools/"
 } else {
     # Defaults to $localappdatapath on Windows
     if ($env:LOCALAPPDATA) {
@@ -83,14 +83,14 @@ if ($IsLinux -or $IsMacOs) {
     # It previously was picking the first value in $Env:XDG_CONFIG_DIRS, but was causing and exception with ubuntu and xdg, saying that access to path /etc/xdg/xdg-ubuntu is denied.
     $fileUserShared = Join-Path $HOME .local/share/
 
-    $script:path_FileUserShared = Join-DbaPath $fileUserShared $psVersionName "dbatools/"
+    $script:path_FileUserShared = Join-Path $fileUserShared  "$psVersionName/dbatools/"
     $script:AppData = $fileUserShared
 } else {
     # Defaults to [System.Environment]::GetFolderPath("ApplicationData") on Windows
-    $script:path_FileUserShared = Join-DbaPath $([System.Environment]::GetFolderPath("ApplicationData")) $psVersionName "dbatools" "Config"
+    $script:path_FileUserShared = Join-Path $([System.Environment]::GetFolderPath("ApplicationData"))  "$psVersionName/dbatools/Config"
     $script:AppData = [System.Environment]::GetFolderPath("ApplicationData")
     if (-not $([System.Environment]::GetFolderPath("ApplicationData"))) {
-        $script:path_FileUserShared = Join-DbaPath $([Environment]::GetFolderPath("ApplicationData")) $psVersionName "dbatools" "Config"
+        $script:path_FileUserShared = Join-Path $([Environment]::GetFolderPath("ApplicationData")) "$psVersionName/dbatools/Config"
         $script:AppData = [System.Environment]::GetFolderPath("ApplicationData")
     }
 }
@@ -102,18 +102,18 @@ if ($IsLinux -or $IsMacOs) {
     $XdgConfigDirs = $Env:XDG_CONFIG_DIRS -split ([IO.Path]::PathSeparator) | Where-Object { $_ -and (Test-Path $_) }
     if ($XdgConfigDirs.Count -gt 1) { $basePath = $XdgConfigDirs[1] }
     else { $basePath = "/etc/xdg/" }
-    $script:path_FileSystem = Join-DbaPath $basePath $psVersionName "dbatools/"
+    $script:path_FileSystem = Join-Path $basePath  "$psVersionName/dbatools/"
 } else {
     # Defaults to $Env:ProgramData on Windows
-    $script:path_FileSystem = Join-DbaPath $Env:ProgramData $psVersionName "dbatools" "Config"
-    if (-not $script:path_FileSystem) { $script:path_FileSystem = Join-DbaPath ([Environment]::GetFolderPath("CommonApplicationData")) $psVersionName "dbatools" "Config" }
+    $script:path_FileSystem = Join-Path $Env:ProgramData "$psVersionName/dbatools/Config"
+    if (-not $script:path_FileSystem) { $script:path_FileSystem = Join-Path ([Environment]::GetFolderPath("CommonApplicationData")) "$psVersionName/dbatools/Config" }
 }
 #endregion System
 
 #region Special Paths
 # $script:AppData is already OS localized
-$script:path_Logging = Join-DbaPath $script:AppData $psVersionName "dbatools" "Logs"
-$script:path_typedata = Join-DbaPath $script:AppData $psVersionName "dbatools" "TypeData"
+$script:path_Logging = Join-Path $script:AppData "$psVersionName/dbatools/Logs"
+$script:path_typedata = Join-Path $script:AppData "$psVersionName/dbatools/TypeData"
 #endregion Special Paths
 #endregion Paths
 
