@@ -1,6 +1,13 @@
 $CommandName = $MyInvocation.MyCommand.Name.Replace(".Tests.ps1", "")
 Write-Host -Object "Running $PSCommandPath" -ForegroundColor Cyan
 . "$PSScriptRoot\constants.ps1"
+
+
+Import-Module ([IO.Path]::Combine(([string]$PSScriptRoot).Trim("tests"), 'src\bin', 'dbatools.dll'))
+. ([IO.Path]::Combine(([string]$PSScriptRoot).Trim("tests"), 'src\internal\functions\message', 'Convert-DbaMessageTarget.ps1'))
+. ([IO.Path]::Combine(([string]$PSScriptRoot).Trim("tests"), 'src\internal\functions\message', 'Convert-DbaMessageException.ps1'))
+. ([IO.Path]::Combine(([string]$PSScriptRoot).Trim("tests"), 'src\internal\functions\flowcontrol', 'Stop-Function.ps1'))
+. ([IO.Path]::Combine(([string]$PSScriptRoot).Trim("tests"), 'src\internal\functions\flowcontrol', 'Test-FunctionInterrupt.ps1'))
 . ([IO.Path]::Combine(([string]$PSScriptRoot).Trim("tests"), 'src\internal\functions', 'Convert-DbaMaskingValue.ps1'))
 
 Describe "$CommandName Unit Tests" -Tag 'UnitTests' {
